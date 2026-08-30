@@ -332,7 +332,7 @@ Backend status: DocuMind AI API is running
 - [x] Initialize React frontend
 - [x] Configure CORS
 - [x] Connect React with FastAPI
-- [ ] Implement document upload API
+- [x] Implement document upload API
 - [ ] Build the React document-upload interface
 - [ ] Add PDF, TXT, and Markdown parsing
 - [ ] Implement document chunking

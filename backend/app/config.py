@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     aws_bucket_name: str
     aws_region: str = "ap-south-1"
 
+    upload_dir: str = "uploads"
+    max_upload_size_mb: int = 10
+
     frontend_url: str = "http://localhost:5173"
 
     model_config = SettingsConfigDict(
