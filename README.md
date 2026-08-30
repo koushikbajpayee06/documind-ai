@@ -8,7 +8,7 @@ The system processes documents, generates embeddings, stores them in a vector da
 
 🚧 Currently under active development.
 
-The FastAPI backend and React frontend have been initialized and successfully connected. Environment configuration, OpenAI chat and embedding models, CORS, and the backend health-check endpoint are working.
+The React frontend and FastAPI backend are successfully connected. Users can upload PDF, TXT, and Markdown documents through the React interface, with file validation and local backend storage.
 
 ## Planned Features
 
@@ -93,6 +93,8 @@ React Frontend
       ↓
 FastAPI Backend
       ↓
+File Validation
+      ↓
 Document Storage
       ↓
 Document Parsing
@@ -142,17 +144,24 @@ documind-ai/
 │   │   │   ├── __init__.py
 │   │   │   └── routes/
 │   │   │       ├── __init__.py
+│   │   │       ├── documents.py
 │   │   │       └── health.py
 │   │   ├── models/
+│   │   ├── schemas/
+│   │   │   ├── __init__.py
+│   │   │   └── document.py
 │   │   ├── services/
 │   │   │   ├── __init__.py
-│   │   │   └── llm_service.py
+│   │   │   ├── llm_service.py
+│   │   │   └── storage_service.py
 │   │   ├── __init__.py
 │   │   ├── config.py
 │   │   └── main.py
 │   ├── tests/
 │   ├── uploads/
+│   │   └── .gitkeep
 │   ├── vector_db/
+│   │   └── .gitkeep
 │   ├── .env.example
 │   ├── .python-version
 │   ├── pyproject.toml
@@ -162,6 +171,8 @@ documind-ai/
 │   ├── public/
 │   ├── src/
 │   │   ├── assets/
+│   │   ├── components/
+│   │   │   └── DocumentUpload.jsx
 │   │   ├── App.css
 │   │   ├── App.jsx
 │   │   ├── index.css
@@ -253,6 +264,13 @@ AWS_BUCKET_NAME=your_bucket_name
 AWS_REGION=ap-south-1
 
 FRONTEND_URL=http://localhost:5173
+
+UPLOAD_DIR=uploads
+MAX_UPLOAD_SIZE_MB=10
+
+CHROMA_PERSIST_DIR=vector_db
+CHROMA_COLLECTION_NAME=documind_documents
+DATABASE_URL=sqlite:///./documind.db
 ```
 
 Never commit the `.env` file or expose real credentials publicly.
@@ -320,6 +338,42 @@ When both servers are running, the frontend should display:
 Backend status: DocuMind AI API is running
 ```
 
+## Document Upload
+
+Users can upload documents from the React interface.
+
+Supported file formats:
+
+- PDF
+- TXT
+- Markdown
+
+Maximum file size:
+
+```text
+10 MB
+```
+
+Upload endpoint:
+
+```text
+POST /api/documents/upload
+```
+
+Successful response:
+
+```json
+{
+  "message": "Document uploaded successfully",
+  "original_filename": "example.pdf",
+  "stored_filename": "generated-uuid.pdf",
+  "content_type": "application/pdf",
+  "size_bytes": 12345
+}
+```
+
+Uploaded files are assigned UUID-based filenames to prevent collisions and are stored locally inside `backend/uploads/` during development.
+
 ## Development Roadmap
 
 - [x] Initialize Git repository
@@ -333,7 +387,9 @@ Backend status: DocuMind AI API is running
 - [x] Configure CORS
 - [x] Connect React with FastAPI
 - [x] Implement document upload API
-- [ ] Build the React document-upload interface
+- [x] Build the React document-upload interface
+- [x] Connect document upload interface with FastAPI
+- [x] Add file type and size validation
 - [ ] Add PDF, TXT, and Markdown parsing
 - [ ] Implement document chunking
 - [ ] Generate document embeddings
@@ -353,7 +409,9 @@ Backend status: DocuMind AI API is running
 - Sensitive values are handled using Pydantic `SecretStr`.
 - Backend and frontend `.env` files are excluded from Git.
 - Uploaded documents and local vector data are excluded from version control.
-- Production AWS credentials should have restricted IAM permissions.
+- Uploaded files are validated by extension and size.
+- UUID-based stored filenames help prevent filename collisions.
+- Production AWS credentials should use restricted IAM permissions.
 - Raw documents and sensitive information should not be written to application logs.
 
 ## Author

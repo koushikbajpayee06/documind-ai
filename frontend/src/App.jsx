@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-
 import './App.css'
+import DocumentUpload from './components/DocumentUpload';
 
 function App() {
   const [backendStatus, setBackendStatus] = useState('Checking...')
@@ -26,13 +26,19 @@ useEffect(() => {
 
     checkBackendHealth();
   }, []);
-  return (
-    <main>
-      <h1>DocuMind AI</h1>
-      <p>Intelligent Document Q&A Platform</p>
-      <p>Backend status: {backendStatus}</p>
+ return (
+    <main className="app-container">
+      <header>
+        <h1>DocuMind AI</h1>
+        <p>Intelligent Document Q&A Platform</p>
+        <p className="backend-status">
+          Backend status: {backendStatus}
+        </p>
+      </header>
+
+      <DocumentUpload />
     </main>
-  )
+  );
 }
 
 export default App
