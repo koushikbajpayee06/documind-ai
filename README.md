@@ -2,13 +2,13 @@
 
 DocuMind AI is a full-stack document intelligence platform that allows users to upload documents and ask context-aware questions using Retrieval-Augmented Generation (RAG).
 
-The system processes documents, generates embeddings, stores them in a vector database, retrieves relevant context, and uses an LLM to produce grounded answers with source references.
+The system processes documents, generates embeddings, stores them in a vector database, retrieves relevant context, and uses a Large Language Model (LLM) to produce grounded answers with source references.
 
 ## Project Status
 
 🚧 Currently under active development.
 
-The initial project structure and backend environment have been configured. Features will be implemented incrementally.
+The FastAPI backend, health-check endpoint, environment configuration, OpenAI chat model, and embedding model have been configured successfully.
 
 ## Planned Features
 
@@ -20,12 +20,13 @@ The initial project structure and backend environment have been configured. Feat
 - Ask questions through a conversational interface
 - Generate context-aware answers using RAG
 - Display source documents and relevant excerpts
-- Store document metadata and query history
+- Store document metadata and conversation history
+- Resume previous conversations
 - Manage indexed documents
-- React-based responsive user interface
-- FastAPI REST API
-- Automated API and service tests
-- AWS deployment
+- Provide a responsive React interface
+- Expose REST APIs using FastAPI
+- Add automated API and service tests
+- Deploy the application on AWS
 
 ## Technology Stack
 
@@ -42,6 +43,7 @@ The initial project structure and backend environment have been configured. Feat
 - FastAPI
 - Uvicorn
 - Pydantic
+- Pydantic Settings
 
 ### AI and Retrieval
 
@@ -52,24 +54,32 @@ The initial project structure and backend environment have been configured. Feat
 
 ### Storage
 
-- SQLite for metadata and logs
+- SQLite for metadata, logs, and conversation history
 - ChromaDB for vector embeddings
 - Local storage during development
 - AWS S3 for production document storage
 
+### Development Tools
+
+- uv
+- Git
+- GitHub
+- Swagger UI
+
 ## High-Level Architecture
 
 ```text
-User
-  ↓
+End User
+    ↓
 React Frontend
-  ↓
+    ↓
 FastAPI Backend
-  ├── Document Storage
-  ├── Metadata Database
-  ├── ChromaDB Vector Store
-  ├── OpenAI Embedding Model
-  └── OpenAI Chat Model
+    ├── Document Storage
+    ├── Metadata Database
+    ├── Conversation History
+    ├── ChromaDB Vector Store
+    ├── OpenAI Embedding Model
+    └── OpenAI Chat Model
 ```
 
 ## Document Ingestion Flow
@@ -78,6 +88,8 @@ FastAPI Backend
 Document Upload
       ↓
 FastAPI Backend
+      ↓
+Document Storage
       ↓
 Document Parsing
       ↓
@@ -93,19 +105,21 @@ ChromaDB Vector Store
 ```text
 User Question
       ↓
-FastAPI Backend
+Load Conversation History
       ↓
-Query Embedding
+Generate Query Embedding
       ↓
 Vector Similarity Search
       ↓
-Relevant Document Chunks
+Retrieve Relevant Chunks
       ↓
-RAG Prompt
+Build RAG Prompt
       ↓
-Large Language Model
+OpenAI Chat Model
       ↓
 Answer with Sources
+      ↓
+Save Conversation
       ↓
 React Frontend
 ```
@@ -117,9 +131,14 @@ documind-ai/
 ├── backend/
 │   ├── app/
 │   │   ├── api/
+│   │   │   ├── __init__.py
 │   │   │   └── routes/
+│   │   │       ├── __init__.py
+│   │   │       └── health.py
 │   │   ├── models/
 │   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   └── llm_service.py
 │   │   ├── __init__.py
 │   │   ├── config.py
 │   │   └── main.py
@@ -137,16 +156,34 @@ documind-ai/
 └── README.md
 ```
 
+## Getting Started
+
+### Prerequisites
+
+Make sure the following tools are installed:
+
+- Python 3.10 or later
+- uv
+- Node.js
+- Git
+
 ## Backend Setup
 
 ### 1. Clone the repository
 
+Using HTTPS:
+
 ```bash
-git clone git@github-koushik:koushikbajpayee06/documind-ai.git
+git clone https://github.com/koushikbajpayee06/documind-ai.git
 cd documind-ai/backend
 ```
 
-If the SSH alias is not configured, use the public GitHub URL instead.
+Using SSH:
+
+```bash
+git clone git@github.com:koushikbajpayee06/documind-ai.git
+cd documind-ai/backend
+```
 
 ### 2. Install dependencies
 
@@ -156,13 +193,13 @@ Using `uv`:
 uv sync
 ```
 
-Alternatively, using `requirements.txt`:
+Alternatively, create a standard Python virtual environment:
 
 ```bash
 python -m venv .venv
 ```
 
-Activate the environment on Windows:
+Activate it on Windows:
 
 ```bash
 .venv\Scripts\activate
@@ -176,15 +213,18 @@ pip install -r requirements.txt
 
 ### 3. Configure environment variables
 
-Create `backend/.env` using `backend/.env.example` as a reference:
+Create a `backend/.env` file using `backend/.env.example` as a reference:
 
 ```env
 OPENAI_API_KEY=your_openai_api_key
+OPENAI_CHAT_MODEL=gpt-4o-mini
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+OPENAI_TEMPERATURE=0
 
 AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
 AWS_BUCKET_NAME=your_bucket_name
-AWS_REGION=your_aws_region
+AWS_REGION=ap-south-1
 ```
 
 Never commit the `.env` file or expose real credentials publicly.
@@ -197,16 +237,19 @@ From the `backend` directory:
 uv run uvicorn app.main:app --reload
 ```
 
-API base URL:
+The API will be available at:
 
-```text
-http://127.0.0.1:8000
-```
+- API: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- Health check: [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
+- Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-Swagger documentation:
+Expected health-check response:
 
-```text
-http://127.0.0.1:8000/docs
+```json
+{
+  "status": "healthy",
+  "message": "DocuMind AI API is running"
+}
 ```
 
 ## Frontend Setup
@@ -215,9 +258,7 @@ The React frontend will be added in an upcoming milestone.
 
 Once initialized, it will run locally at:
 
-```text
-http://localhost:5173
-```
+[http://localhost:5173](http://localhost:5173)
 
 ## Development Roadmap
 
@@ -226,29 +267,38 @@ http://localhost:5173
 - [x] Configure backend dependencies
 - [x] Add environment configuration template
 - [x] Define initial project architecture
-- [ ] Create FastAPI application and health endpoint
+- [x] Configure OpenAI chat and embedding models
+- [x] Create FastAPI application and health endpoint
 - [ ] Initialize React frontend
 - [ ] Connect React with FastAPI
 - [ ] Implement document upload API
 - [ ] Add PDF, TXT, and Markdown parsing
 - [ ] Implement document chunking
-- [ ] Generate OpenAI embeddings
+- [ ] Generate document embeddings
 - [ ] Integrate ChromaDB
-- [ ] Build the RAG query pipeline
+- [ ] Build the history-aware RAG pipeline
 - [ ] Return answers with source references
-- [ ] Add SQLite metadata and chat history
+- [ ] Add SQLite metadata and conversation history
+- [ ] Add conversation resume functionality
 - [ ] Integrate AWS S3
-- [ ] Add tests and error handling
+- [ ] Add automated tests and error handling
 - [ ] Containerize the application
 - [ ] Deploy the application
 
 ## Security
 
 - Secrets are stored using environment variables.
+- Sensitive values are handled using Pydantic `SecretStr`.
 - The `.env` file is excluded from Git.
 - Uploaded documents and local vector data are excluded from version control.
-- Production credentials must use restricted IAM permissions.
-- Raw documents and sensitive information must not be written to application logs.
+- Production AWS credentials should have restricted IAM permissions.
+- Raw documents and sensitive information should not be written to application logs.
+
+## Author
+
+**Koushik Bajpayee**
+
+- GitHub: [koushikbajpayee06](https://github.com/koushikbajpayee06)
 
 ## License
 
