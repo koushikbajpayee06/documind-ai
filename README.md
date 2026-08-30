@@ -8,7 +8,7 @@ The system processes documents, generates embeddings, stores them in a vector da
 
 🚧 Currently under active development.
 
-The FastAPI backend, health-check endpoint, environment configuration, OpenAI chat model, and embedding model have been configured successfully.
+The FastAPI backend and React frontend have been initialized and successfully connected. Environment configuration, OpenAI chat and embedding models, CORS, and the backend health-check endpoint are working.
 
 ## Planned Features
 
@@ -36,6 +36,7 @@ The FastAPI backend, health-check endpoint, environment configuration, OpenAI ch
 - Vite
 - JavaScript
 - CSS
+- Fetch API
 
 ### Backend
 
@@ -62,6 +63,7 @@ The FastAPI backend, health-check endpoint, environment configuration, OpenAI ch
 ### Development Tools
 
 - uv
+- npm
 - Git
 - GitHub
 - Swagger UI
@@ -87,6 +89,8 @@ FastAPI Backend
 ```text
 Document Upload
       ↓
+React Frontend
+      ↓
 FastAPI Backend
       ↓
 Document Storage
@@ -104,6 +108,10 @@ ChromaDB Vector Store
 
 ```text
 User Question
+      ↓
+React Frontend
+      ↓
+FastAPI Backend
       ↓
 Load Conversation History
       ↓
@@ -151,6 +159,17 @@ documind-ai/
 │   ├── requirements.txt
 │   └── uv.lock
 ├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── App.css
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── .env.example
+│   ├── package.json
+│   ├── package-lock.json
+│   └── vite.config.js
 ├── docs/
 ├── .gitignore
 └── README.md
@@ -165,24 +184,31 @@ Make sure the following tools are installed:
 - Python 3.10 or later
 - uv
 - Node.js
+- npm
 - Git
 
-## Backend Setup
-
-### 1. Clone the repository
+## Clone the Repository
 
 Using HTTPS:
 
 ```bash
 git clone https://github.com/koushikbajpayee06/documind-ai.git
-cd documind-ai/backend
+cd documind-ai
 ```
 
 Using SSH:
 
 ```bash
 git clone git@github.com:koushikbajpayee06/documind-ai.git
-cd documind-ai/backend
+cd documind-ai
+```
+
+## Backend Setup
+
+### 1. Navigate to the backend
+
+```bash
+cd backend
 ```
 
 ### 2. Install dependencies
@@ -193,7 +219,7 @@ Using `uv`:
 uv sync
 ```
 
-Alternatively, create a standard Python virtual environment:
+Alternatively, create a standard virtual environment:
 
 ```bash
 python -m venv .venv
@@ -205,15 +231,15 @@ Activate it on Windows:
 .venv\Scripts\activate
 ```
 
-Install dependencies:
+Install the dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Configure environment variables
+### 3. Configure backend environment variables
 
-Create a `backend/.env` file using `backend/.env.example` as a reference:
+Create `backend/.env` using `backend/.env.example`:
 
 ```env
 OPENAI_API_KEY=your_openai_api_key
@@ -225,6 +251,8 @@ AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
 AWS_BUCKET_NAME=your_bucket_name
 AWS_REGION=ap-south-1
+
+FRONTEND_URL=http://localhost:5173
 ```
 
 Never commit the `.env` file or expose real credentials publicly.
@@ -237,7 +265,7 @@ From the `backend` directory:
 uv run uvicorn app.main:app --reload
 ```
 
-The API will be available at:
+Backend links:
 
 - API: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 - Health check: [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
@@ -254,24 +282,58 @@ Expected health-check response:
 
 ## Frontend Setup
 
-The React frontend will be added in an upcoming milestone.
+### 1. Navigate to the frontend
 
-Once initialized, it will run locally at:
+Open another terminal from the project root:
+
+```bash
+cd frontend
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure frontend environment variables
+
+Create `frontend/.env` using `frontend/.env.example`:
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000
+```
+
+### 4. Start the React development server
+
+```bash
+npm run dev
+```
+
+The frontend will be available at:
 
 [http://localhost:5173](http://localhost:5173)
+
+When both servers are running, the frontend should display:
+
+```text
+Backend status: DocuMind AI API is running
+```
 
 ## Development Roadmap
 
 - [x] Initialize Git repository
 - [x] Set up Python environment with `uv`
 - [x] Configure backend dependencies
-- [x] Add environment configuration template
+- [x] Add environment configuration templates
 - [x] Define initial project architecture
 - [x] Configure OpenAI chat and embedding models
 - [x] Create FastAPI application and health endpoint
-- [ ] Initialize React frontend
-- [ ] Connect React with FastAPI
+- [x] Initialize React frontend
+- [x] Configure CORS
+- [x] Connect React with FastAPI
 - [ ] Implement document upload API
+- [ ] Build the React document-upload interface
 - [ ] Add PDF, TXT, and Markdown parsing
 - [ ] Implement document chunking
 - [ ] Generate document embeddings
@@ -289,7 +351,7 @@ Once initialized, it will run locally at:
 
 - Secrets are stored using environment variables.
 - Sensitive values are handled using Pydantic `SecretStr`.
-- The `.env` file is excluded from Git.
+- Backend and frontend `.env` files are excluded from Git.
 - Uploaded documents and local vector data are excluded from version control.
 - Production AWS credentials should have restricted IAM permissions.
 - Raw documents and sensitive information should not be written to application logs.
