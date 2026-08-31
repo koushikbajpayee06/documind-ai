@@ -306,7 +306,9 @@ jsonpointer==3.1.1 \
 langchain-core==1.6.1 \
     --hash=sha256:1b156cb395aac4f009a8a1b38a574c7d948fe2d5f74c96e0d8a5017b4149e04f \
     --hash=sha256:954a84132a5cb0435d27b910e336347b6744ecc18fbeef1e2de7029a0959841a
-    # via langchain-openai
+    # via
+    #   langchain-openai
+    #   langchain-text-splitters
 langchain-openai==1.6.0 \
     --hash=sha256:648112bbd135aa51d60d4aa2fd4ad353628a8d92a2f8e779244a0d9869a16f18 \
     --hash=sha256:7c545cc1f2bee048a7e219f375b78cd820b32c876ccf825320e25e1e94132577
@@ -315,6 +317,10 @@ langchain-protocol==0.0.19 \
     --hash=sha256:4cdf879a492a35980fd859ae792d3c65458ccaae504e183c9a10d7eac1f0720f \
     --hash=sha256:79d90a1425122ac87e8052e2ec054fbd09c3edbf341bdfb6397112a495c7bf8c
     # via langchain-core
+langchain-text-splitters==1.1.2 \
+    --hash=sha256:782a723db0a4746ac91e251c7c1d57fd23636e4f38ed733074e28d7a86f41627 \
+    --hash=sha256:a2de0d799ff31886429fd6e2e0032df275b60ec817c19059a7b46181cc1c2f10
+    # via backend
 langsmith==0.11.2 \
     --hash=sha256:75258142d27dffcc5df331479704b23fc3fd812cfca0469119bb9055a842882f \
     --hash=sha256:927694c939c9fb44187e0126cf718413c45ffce2324d480438e70eb0526e1380
