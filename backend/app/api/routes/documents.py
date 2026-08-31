@@ -8,6 +8,8 @@ from app.schemas.document import DocumentUploadResponse
 from app.services.document_service import create_chunks, extract_text
 from app.services.storage_service import save_uploaded_file
 
+from app.services.vector_store import add_documents_to_vector_store
+
 
 logger = logging.getLogger(__name__)
 
@@ -40,13 +42,14 @@ async def upload_document(
             source=saved_file["original_filename"],
         )
 
+        document_ids = add_documents_to_vector_store(chunks)
+
         return DocumentUploadResponse(
-            message="Document uploaded and processed successfully",
+            message="Document uploaded, processed, and indexed successfully",
             character_count=len(extracted_text),
-            chunk_count=len(chunks),
+            chunk_count=len(document_ids),
             **saved_file,
         )
-
     except (ValueError, FileNotFoundError) as error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -55,10 +58,10 @@ async def upload_document(
 
     except Exception as error:
         logger.exception(
-            "Unexpected error while uploading and processing document"
+            "Unexpected error while uploading, processing, and indexing document"
         )
 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to upload and process document",
+            detail="Failed to upload, process, and index document",
         ) from error

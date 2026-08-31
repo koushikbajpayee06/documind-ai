@@ -4,6 +4,7 @@ from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
+    # OpenAI settings
     openai_api_key: SecretStr
     openai_chat_model: str = "gpt-4o-mini"
     openai_embedding_model: str = "text-embedding-3-small"
@@ -18,6 +19,10 @@ class Settings(BaseSettings):
     max_upload_size_mb: int = 10
 
     frontend_url: str = "http://localhost:5173"
+
+     # ChromaDB settings
+    chroma_persist_dir: str = "vector_db"
+    chroma_collection_name: str = "documind_documents"
 
     model_config = SettingsConfigDict(
         env_file=".env",
