@@ -1,32 +1,57 @@
 # DocuMind AI
 
-DocuMind AI is a full-stack document intelligence platform that allows users to upload documents and ask context-aware questions using Retrieval-Augmented Generation (RAG).
+DocuMind AI is a full-stack document intelligence platform that allows users to upload documents and retrieve context-aware information using Retrieval-Augmented Generation (RAG).
 
-The system processes documents, generates embeddings, stores them in a vector database, retrieves relevant context, and uses a Large Language Model (LLM) to produce grounded answers with source references.
+The system extracts content from uploaded documents, splits it into searchable chunks, generates vector embeddings, stores them in ChromaDB, and performs semantic similarity searches to retrieve relevant document sections.
 
 ## Project Status
 
 🚧 Currently under active development.
 
-The React frontend and FastAPI backend are successfully connected. Users can upload PDF, TXT, and Markdown documents through the React interface, with file validation and local backend storage.
+The following features are currently working:
 
-## Planned Features
+- React frontend connected with FastAPI
+- PDF, TXT, and Markdown document uploads
+- File type and size validation
+- Local document storage with UUID-based filenames
+- Text extraction from supported documents
+- Recursive document chunking
+- OpenAI embedding generation
+- Persistent ChromaDB vector storage
+- Duplicate-safe document indexing
+- Semantic similarity search API
+
+The next milestone is building the RAG question-answering pipeline using the retrieved document chunks and the OpenAI chat model.
+
+## Features
+
+### Implemented
 
 - Upload PDF, TXT, and Markdown documents
-- Store raw documents locally or in AWS S3
-- Extract and chunk document content
-- Generate vector embeddings using OpenAI
-- Store and retrieve embeddings using ChromaDB
-- Ask questions through a conversational interface
-- Generate context-aware answers using RAG
+- Validate uploaded file type and size
+- Store uploaded documents locally
+- Extract readable text from documents
+- Split documents into overlapping chunks
+- Generate embeddings using OpenAI
+- Persist embeddings in ChromaDB
+- Prevent duplicate chunk indexing using deterministic IDs
+- Perform semantic similarity searches
+- Display upload and processing results in React
+- Expose REST APIs using FastAPI
+- Provide interactive API documentation through Swagger UI
+
+### Planned
+
+- Generate grounded answers using RAG
 - Display source documents and relevant excerpts
-- Store document metadata and conversation history
+- Build a React question-answering interface
+- Store document metadata in SQLite
+- Store conversation history
 - Resume previous conversations
 - Manage indexed documents
-- Provide a responsive React interface
-- Expose REST APIs using FastAPI
+- Store production documents in AWS S3
 - Add automated API and service tests
-- Deploy the application on AWS
+- Containerize and deploy the application
 
 ## Technology Stack
 
@@ -52,13 +77,20 @@ The React frontend and FastAPI backend are successfully connected. Users can upl
 - OpenAI
 - ChromaDB
 - Retrieval-Augmented Generation
+- Recursive Character Text Splitter
+
+### Document Processing
+
+- PyPDF
+- Pathlib
+- LangChain Documents
 
 ### Storage
 
-- SQLite for metadata, logs, and conversation history
 - ChromaDB for vector embeddings
-- Local storage during development
-- AWS S3 for production document storage
+- Local filesystem during development
+- SQLite for planned metadata and conversation history
+- AWS S3 for planned production document storage
 
 ### Development Tools
 
@@ -72,65 +104,104 @@ The React frontend and FastAPI backend are successfully connected. Users can upl
 
 ```text
 End User
-    ↓
+    │
+    ▼
 React Frontend
-    ↓
+    │
+    ▼
 FastAPI Backend
-    ├── Document Storage
-    ├── Metadata Database
-    ├── Conversation History
-    ├── ChromaDB Vector Store
+    ├── Document Validation
+    ├── Local Document Storage
+    ├── Document Processing
     ├── OpenAI Embedding Model
-    └── OpenAI Chat Model
+    ├── ChromaDB Vector Store
+    └── OpenAI Chat Model (RAG milestone)
 ```
 
 ## Document Ingestion Flow
 
 ```text
 Document Upload
-      ↓
+      │
+      ▼
 React Frontend
-      ↓
-FastAPI Backend
-      ↓
+      │
+      ▼
+FastAPI Upload API
+      │
+      ▼
 File Validation
-      ↓
-Document Storage
-      ↓
-Document Parsing
-      ↓
-Text Chunking
-      ↓
-Embedding Generation
-      ↓
+      │
+      ▼
+Local Document Storage
+      │
+      ▼
+Text Extraction
+      │
+      ▼
+Recursive Text Chunking
+      │
+      ▼
+OpenAI Embedding Generation
+      │
+      ▼
 ChromaDB Vector Store
 ```
 
-## RAG Query Flow
+## Semantic Search Flow
+
+```text
+Search Query
+      │
+      ▼
+FastAPI Semantic Search API
+      │
+      ▼
+OpenAI Query Embedding
+      │
+      ▼
+ChromaDB Similarity Search
+      │
+      ▼
+Relevant Document Chunks
+      │
+      ▼
+JSON Response with Sources
+```
+
+## Planned RAG Flow
 
 ```text
 User Question
-      ↓
+      │
+      ▼
 React Frontend
-      ↓
+      │
+      ▼
 FastAPI Backend
-      ↓
+      │
+      ▼
 Load Conversation History
-      ↓
-Generate Query Embedding
-      ↓
-Vector Similarity Search
-      ↓
+      │
+      ▼
+Semantic Similarity Search
+      │
+      ▼
 Retrieve Relevant Chunks
-      ↓
+      │
+      ▼
 Build RAG Prompt
-      ↓
+      │
+      ▼
 OpenAI Chat Model
-      ↓
+      │
+      ▼
 Answer with Sources
-      ↓
+      │
+      ▼
 Save Conversation
-      ↓
+      │
+      ▼
 React Frontend
 ```
 
@@ -145,18 +216,27 @@ documind-ai/
 │   │   │   └── routes/
 │   │   │       ├── __init__.py
 │   │   │       ├── documents.py
-│   │   │       └── health.py
+│   │   │       ├── health.py
+│   │   │       └── search.py
+│   │   │
 │   │   ├── models/
+│   │   │
 │   │   ├── schemas/
 │   │   │   ├── __init__.py
-│   │   │   └── document.py
+│   │   │   ├── document.py
+│   │   │   └── search.py
+│   │   │
 │   │   ├── services/
 │   │   │   ├── __init__.py
+│   │   │   ├── document_service.py
 │   │   │   ├── llm_service.py
-│   │   │   └── storage_service.py
+│   │   │   ├── storage_service.py
+│   │   │   └── vector_store.py
+│   │   │
 │   │   ├── __init__.py
 │   │   ├── config.py
 │   │   └── main.py
+│   │
 │   ├── tests/
 │   ├── uploads/
 │   │   └── .gitkeep
@@ -167,6 +247,7 @@ documind-ai/
 │   ├── pyproject.toml
 │   ├── requirements.txt
 │   └── uv.lock
+│
 ├── frontend/
 │   ├── public/
 │   ├── src/
@@ -181,6 +262,7 @@ documind-ai/
 │   ├── package.json
 │   ├── package-lock.json
 │   └── vite.config.js
+│
 ├── docs/
 ├── .gitignore
 └── README.md
@@ -216,13 +298,13 @@ cd documind-ai
 
 ## Backend Setup
 
-### 1. Navigate to the backend
+### 1. Navigate to the Backend
 
 ```bash
 cd backend
 ```
 
-### 2. Install dependencies
+### 2. Install Dependencies
 
 Using `uv`:
 
@@ -230,7 +312,7 @@ Using `uv`:
 uv sync
 ```
 
-Alternatively, create a standard virtual environment:
+Alternatively, create a standard Python virtual environment:
 
 ```bash
 python -m venv .venv
@@ -248,9 +330,9 @@ Install the dependencies:
 pip install -r requirements.txt
 ```
 
-### 3. Configure backend environment variables
+### 3. Configure Backend Environment Variables
 
-Create `backend/.env` using `backend/.env.example`:
+Create `backend/.env` using `backend/.env.example` as a reference:
 
 ```env
 OPENAI_API_KEY=your_openai_api_key
@@ -270,12 +352,13 @@ MAX_UPLOAD_SIZE_MB=10
 
 CHROMA_PERSIST_DIR=vector_db
 CHROMA_COLLECTION_NAME=documind_documents
+
 DATABASE_URL=sqlite:///./documind.db
 ```
 
 Never commit the `.env` file or expose real credentials publicly.
 
-### 4. Start the FastAPI server
+### 4. Start the FastAPI Server
 
 From the `backend` directory:
 
@@ -285,9 +368,9 @@ uv run uvicorn app.main:app --reload
 
 Backend links:
 
-- API: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-- Health check: [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
-- Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- API: http://127.0.0.1:8000
+- Health check: http://127.0.0.1:8000/api/health
+- Swagger UI: http://127.0.0.1:8000/docs
 
 Expected health-check response:
 
@@ -300,7 +383,7 @@ Expected health-check response:
 
 ## Frontend Setup
 
-### 1. Navigate to the frontend
+### 1. Navigate to the Frontend
 
 Open another terminal from the project root:
 
@@ -308,21 +391,21 @@ Open another terminal from the project root:
 cd frontend
 ```
 
-### 2. Install dependencies
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Configure frontend environment variables
+### 3. Configure Frontend Environment Variables
 
-Create `frontend/.env` using `frontend/.env.example`:
+Create `frontend/.env` using `frontend/.env.example` as a reference:
 
 ```env
 VITE_API_BASE_URL=http://127.0.0.1:8000
 ```
 
-### 4. Start the React development server
+### 4. Start the React Development Server
 
 ```bash
 npm run dev
@@ -330,7 +413,9 @@ npm run dev
 
 The frontend will be available at:
 
-[http://localhost:5173](http://localhost:5173)
+```text
+http://localhost:5173
+```
 
 When both servers are running, the frontend should display:
 
@@ -342,7 +427,7 @@ Backend status: DocuMind AI API is running
 
 Users can upload documents from the React interface.
 
-Supported file formats:
+Supported formats:
 
 - PDF
 - TXT
@@ -354,25 +439,80 @@ Maximum file size:
 10 MB
 ```
 
-Upload endpoint:
+### Upload Endpoint
 
-```text
+```http
 POST /api/documents/upload
 ```
 
-Successful response:
+The request must use `multipart/form-data` with a field named `file`.
+
+Example successful response:
 
 ```json
 {
-  "message": "Document uploaded successfully",
+  "message": "Document uploaded, processed, and indexed successfully",
   "original_filename": "example.pdf",
   "stored_filename": "generated-uuid.pdf",
   "content_type": "application/pdf",
-  "size_bytes": 12345
+  "size_bytes": 587379,
+  "character_count": 110399,
+  "chunk_count": 138
 }
 ```
 
-Uploaded files are assigned UUID-based filenames to prevent collisions and are stored locally inside `backend/uploads/` during development.
+During document upload, the backend:
+
+1. Validates the file type and size.
+2. Assigns a UUID-based stored filename.
+3. Saves the document inside `backend/uploads/`.
+4. Extracts readable text from the document.
+5. Divides the text into overlapping chunks.
+6. Generates embeddings for each chunk.
+7. Stores the chunks and embeddings in ChromaDB.
+
+## Semantic Search
+
+The semantic search endpoint retrieves document chunks that are conceptually related to the provided query.
+
+### Search Endpoint
+
+```http
+POST /api/search/semantic
+```
+
+Example request:
+
+```json
+{
+  "query": "What are the benefits of APIs?",
+  "limit": 3
+}
+```
+
+Example response:
+
+```json
+{
+  "query": "What are the benefits of APIs?",
+  "results": [
+    {
+      "content": "APIs enable different systems and applications to communicate...",
+      "source": "Complete Notes.pdf",
+      "chunk_index": 1,
+      "document_id": "generated-deterministic-id"
+    }
+  ]
+}
+```
+
+The search endpoint currently returns relevant chunks. Answer generation using the retrieved context will be added in the RAG milestone.
+
+## Duplicate-Safe Indexing
+
+DocuMind AI generates deterministic identifiers for document chunks using their source, chunk index, and content.
+
+This prevents the same chunk from being stored repeatedly when an identical document is uploaded more than once.
 
 ## Development Roadmap
 
@@ -380,26 +520,29 @@ Uploaded files are assigned UUID-based filenames to prevent collisions and are s
 - [x] Set up Python environment with `uv`
 - [x] Configure backend dependencies
 - [x] Add environment configuration templates
-- [x] Define initial project architecture
+- [x] Define the initial project architecture
 - [x] Configure OpenAI chat and embedding models
-- [x] Create FastAPI application and health endpoint
-- [x] Initialize React frontend
+- [x] Create the FastAPI application and health endpoint
+- [x] Initialize the React frontend
 - [x] Configure CORS
 - [x] Connect React with FastAPI
-- [x] Implement document upload API
+- [x] Implement the document upload API
 - [x] Build the React document-upload interface
-- [x] Connect document upload interface with FastAPI
 - [x] Add file type and size validation
 - [x] Add PDF, TXT, and Markdown parsing
-- [x] Implement document chunking
-- [ ] Generate document embeddings
-- [ ] Integrate ChromaDB
+- [x] Implement recursive document chunking
+- [x] Generate document embeddings
+- [x] Integrate persistent ChromaDB storage
+- [x] Add duplicate-safe chunk indexing
+- [x] Implement the semantic similarity search API
+- [ ] Build the React semantic-search interface
 - [ ] Build the history-aware RAG pipeline
-- [ ] Return answers with source references
+- [ ] Return generated answers with source references
 - [ ] Add SQLite metadata and conversation history
 - [ ] Add conversation resume functionality
+- [ ] Add indexed-document management
 - [ ] Integrate AWS S3
-- [ ] Add automated tests and error handling
+- [ ] Add automated tests and improved error handling
 - [ ] Containerize the application
 - [ ] Deploy the application
 
@@ -413,6 +556,7 @@ Uploaded files are assigned UUID-based filenames to prevent collisions and are s
 - UUID-based stored filenames help prevent filename collisions.
 - Production AWS credentials should use restricted IAM permissions.
 - Raw documents and sensitive information should not be written to application logs.
+- OpenAI and AWS credentials must never be committed to Git.
 
 ## Author
 
