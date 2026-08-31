@@ -7,3 +7,5 @@ class DocumentUploadResponse(BaseModel):
     stored_filename: str
     content_type: str
     size_bytes: int
+    character_count: int
+    chunk_count: int

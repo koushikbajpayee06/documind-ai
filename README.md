@@ -390,8 +390,8 @@ Uploaded files are assigned UUID-based filenames to prevent collisions and are s
 - [x] Build the React document-upload interface
 - [x] Connect document upload interface with FastAPI
 - [x] Add file type and size validation
-- [ ] Add PDF, TXT, and Markdown parsing
-- [ ] Implement document chunking
+- [x] Add PDF, TXT, and Markdown parsing
+- [x] Implement document chunking
 - [ ] Generate document embeddings
 - [ ] Integrate ChromaDB
 - [ ] Build the history-aware RAG pipeline

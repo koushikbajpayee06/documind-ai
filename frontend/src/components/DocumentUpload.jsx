@@ -57,10 +57,11 @@ const DocumentUpload = () => {
       if (!response.ok) {
         throw new Error(data.detail || "Document upload failed");
       }
-
-      setUploadStatus(
-        `${data.original_filename} uploaded successfully.`
-      );
+    setUploadStatus(
+      `${data.original_filename} uploaded successfully. ` +
+        `${data.character_count.toLocaleString()} characters extracted and ` +
+        `${data.chunk_count} searchable chunks created.`
+    );
 
       setSelectedFile(null);
       form.reset();
@@ -96,7 +97,7 @@ const DocumentUpload = () => {
           type="submit"
           disabled={!selectedFile || isUploading}
         >
-          {isUploading ? "Uploading..." : "Upload document"}
+          {isUploading ? "Uploading and processing..." : "Upload document"}
         </button>
       </form>
 
