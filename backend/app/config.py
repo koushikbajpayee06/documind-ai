@@ -1,7 +1,10 @@
-
 from functools import lru_cache
+from pathlib import Path
+
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 class Settings(BaseSettings):
     # OpenAI settings
@@ -10,22 +13,23 @@ class Settings(BaseSettings):
     openai_embedding_model: str = "text-embedding-3-small"
     openai_temperature: float = 0.0
 
-    aws_access_key: SecretStr
-    aws_secret_key: SecretStr
-    aws_bucket_name: str
+    # AWS settings — optional until S3 integration is implemented
+    aws_access_key_id: SecretStr | None = None
+    aws_secret_access_key: SecretStr | None = None
+    aws_bucket_name: str | None = None
     aws_region: str = "ap-south-1"
 
-    upload_dir: str = "uploads"
+    upload_dir: Path = BACKEND_DIR / "uploads"
     max_upload_size_mb: int = 10
 
     frontend_url: str = "http://localhost:5173"
 
-     # ChromaDB settings
-    chroma_persist_dir: str = "vector_db"
+    # ChromaDB settings
+    chroma_persist_dir: Path = BACKEND_DIR / "vector_db"
     chroma_collection_name: str = "documind_documents"
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=BACKEND_DIR / ".env",
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=False,
@@ -34,6 +38,5 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-
 
 settings = get_settings()
