@@ -1,4 +1,4 @@
-# DocuMind AI
+# DocuMind AI — Enterprise IT Support Assistant
 
 DocuMind AI is a full-stack document intelligence platform that allows users to upload documents and retrieve context-aware information using Retrieval-Augmented Generation (RAG).
 
