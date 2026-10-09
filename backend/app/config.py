@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     # ChromaDB settings
     chroma_persist_dir: Path = BACKEND_DIR / "vector_db"
     chroma_collection_name: str = "documind_documents"
+    max_search_distance: float = 1.25
 
     model_config = SettingsConfigDict(
         env_file=BACKEND_DIR / ".env",

@@ -5,6 +5,7 @@ const SemanticSearch = () => {
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
   
   const handleChange = (e)=>{
     setQuery(e.target.value)
@@ -12,6 +13,10 @@ const SemanticSearch = () => {
   const handleSubmit = async (e)=>{
     e.preventDefault()
     const trimmedQuery = query.trim();
+    setHasSearched(false);
+    setError("");
+    setResults([]);
+    setIsSearching(true);
 
     if (!trimmedQuery) {
         return;
@@ -38,12 +43,14 @@ const SemanticSearch = () => {
             throw new Error(data.detail || "Search failed");
         }
         setResults(data.results);
+        setHasSearched(true)
     }catch(error){
         setError(error.message)
     }finally{
         setIsSearching(false);
     }
   }
+
   return (
     <section className="search-card">
       <h2>Search documents</h2>
@@ -55,6 +62,14 @@ const SemanticSearch = () => {
             disabled={query.trim() === "" || isSearching}
         >{isSearching ? "Searching..." : "Search"}</button>
       </form>
+      {hasSearched &&
+        !isSearching &&
+        !error &&
+        results.length === 0 && (
+            <p className="no-results">
+                No relevant results found in the indexed documents.
+            </p>
+    )}
       {error && (<p className="search-error">{error}</p>)}
       {results.length > 0 && (
         <div className="search-results">

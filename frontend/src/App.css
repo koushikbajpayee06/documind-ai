@@ -234,3 +234,12 @@ header > p:not(.backend-status) {
     padding: 15px;
   }
 }
+.search-card > .no-results {
+  margin: 20px 0 0;
+  padding: 16px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #64748b;
+  text-align: center;
+}

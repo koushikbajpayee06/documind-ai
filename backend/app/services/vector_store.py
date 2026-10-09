@@ -49,13 +49,18 @@ def add_documents_to_vector_store(
 def search_documents(
     query: str,
     number_of_results: int = 4,
-) -> list[Document]:
+) -> list[tuple[Document, float]]:
     if not query.strip():
         raise ValueError("Search query cannot be empty")
 
     vector_store = get_vector_store()
 
-    return vector_store.similarity_search(
+    document_distance_pairs = vector_store.similarity_search_with_score(
         query=query,
         k=number_of_results,
     )
+    return [
+        (document, distance)
+        for document, distance in document_distance_pairs
+        if distance <= settings.max_search_distance
+    ]

@@ -15,6 +15,7 @@ class SearchRequest(BaseModel):
 class SearchResult(BaseModel):
     content: str
     metadata: dict[str, Any]
+    distance: float
 
 
 class SearchResponse(BaseModel):
