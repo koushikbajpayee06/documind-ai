@@ -1,8 +1,8 @@
-# DocuMind AI — Enterprise IT Support Assistant
+# Enterprise IT Support Assistant
 
-DocuMind AI is a full-stack document intelligence platform that allows users to upload documents and retrieve context-aware information using Retrieval-Augmented Generation (RAG).
+Enterprise IT Support Assistant is a full-stack document intelligence application designed to retrieve reliable information from internal IT documentation and gradually evolve into an AI-powered support copilot.
 
-The system extracts content from uploaded documents, splits it into searchable chunks, generates vector embeddings, stores them in ChromaDB, and performs semantic similarity searches to retrieve relevant document sections.
+The current system extracts content from uploaded documents, splits it into searchable chunks, generates vector embeddings, stores them in ChromaDB, and performs semantic searches with configurable relevance filtering. Grounded RAG answers and support workflows are planned but have not yet been implemented.
 
 ## Project Status
 
@@ -20,8 +20,13 @@ The following features are currently working:
 - Persistent ChromaDB vector storage
 - Duplicate-safe document indexing
 - Semantic similarity search API
+- React semantic-search interface
+- Raw vector-distance reporting
+- Configurable filtering of low-relevance results
+- Empty-result handling for irrelevant queries
+- Automated unit tests for retrieval filtering
 
-The next milestone is building the RAG question-answering pipeline using the retrieved document chunks and the OpenAI chat model.
+The next milestone is citation-ready document ingestion. PDF pages will be processed separately so that each chunk preserves its source filename, page number, and chunk index. This metadata will later support grounded RAG answers with precise citations.
 
 ## Features
 
@@ -36,21 +41,31 @@ The next milestone is building the RAG question-answering pipeline using the ret
 - Persist embeddings in ChromaDB
 - Prevent duplicate chunk indexing using deterministic IDs
 - Perform semantic similarity searches
+- Return raw vector distances with search results
+- Filter low-relevance results using a configurable maximum distance
+- Return an empty result set when no relevant chunk is found
 - Display upload and processing results in React
+- Display semantic-search results in React
+- Test retrieval filtering and empty-query behavior with pytest
 - Expose REST APIs using FastAPI
 - Provide interactive API documentation through Swagger UI
 
 ### Planned
 
-- Generate grounded answers using RAG
-- Display source documents and relevant excerpts
+- Preserve PDF page numbers during ingestion
+- Generate grounded answers with source and page citations
 - Build a React question-answering interface
-- Store document metadata in SQLite
-- Store conversation history
+- Orchestrate support workflows with LangGraph
+- Store document metadata and persistent state in PostgreSQL
+- Store conversation history in PostgreSQL
 - Resume previous conversations
 - Manage indexed documents
+- Add authentication and authorization
+- Add ticket lookup and draft creation
+- Require human approval before ticket submission
+- Stream generated responses
 - Store production documents in AWS S3
-- Add automated API and service tests
+- Expand retrieval evaluation, API, and integration tests
 - Containerize and deploy the application
 
 ## Technology Stack
@@ -76,7 +91,8 @@ The next milestone is building the RAG question-answering pipeline using the ret
 - LangChain
 - OpenAI
 - ChromaDB
-- Retrieval-Augmented Generation
+- Retrieval-Augmented Generation (planned)
+- LangGraph (planned)
 - Recursive Character Text Splitter
 
 ### Document Processing
@@ -89,7 +105,7 @@ The next milestone is building the RAG question-answering pipeline using the ret
 
 - ChromaDB for vector embeddings
 - Local filesystem during development
-- SQLite for planned metadata and conversation history
+- PostgreSQL for planned metadata, conversation history, and workflow state
 - AWS S3 for planned production document storage
 
 ### Development Tools
@@ -99,6 +115,7 @@ The next milestone is building the RAG question-answering pipeline using the ret
 - Git
 - GitHub
 - Swagger UI
+- pytest
 
 ## High-Level Architecture
 
@@ -163,10 +180,16 @@ OpenAI Query Embedding
 ChromaDB Similarity Search
       │
       ▼
-Relevant Document Chunks
+Raw Vector Distances
       │
       ▼
-JSON Response with Sources
+Maximum-Distance Filter
+      │
+      ▼
+Relevant Chunks or Empty Result
+      │
+      ▼
+JSON Response with Sources and Distances
 ```
 
 ## Planned RAG Flow
@@ -208,7 +231,7 @@ React Frontend
 ## Project Structure
 
 ```text
-documind-ai/
+enterprise-it-support-assistant/
 ├── backend/
 │   ├── app/
 │   │   ├── api/
@@ -238,6 +261,8 @@ documind-ai/
 │   │   └── main.py
 │   │
 │   ├── tests/
+│   │   ├── __init__.py
+│   │   └── test_vector_store.py
 │   ├── uploads/
 │   │   └── .gitkeep
 │   ├── vector_db/
@@ -253,7 +278,8 @@ documind-ai/
 │   ├── src/
 │   │   ├── assets/
 │   │   ├── components/
-│   │   │   └── DocumentUpload.jsx
+│   │   │   ├── DocumentUpload.jsx
+│   │   │   └── SemanticSearch.jsx
 │   │   ├── App.css
 │   │   ├── App.jsx
 │   │   ├── index.css
@@ -285,15 +311,15 @@ Make sure the following tools are installed:
 Using HTTPS:
 
 ```bash
-git clone https://github.com/koushikbajpayee06/documind-ai.git
-cd documind-ai
+git clone https://github.com/koushikbajpayee06/enterprise-it-support-assistant.git
+cd enterprise-it-support-assistant
 ```
 
 Using SSH:
 
 ```bash
-git clone git@github.com:koushikbajpayee06/documind-ai.git
-cd documind-ai
+git clone git@github.com:koushikbajpayee06/enterprise-it-support-assistant.git
+cd enterprise-it-support-assistant
 ```
 
 ## Backend Setup
@@ -340,9 +366,9 @@ OPENAI_CHAT_MODEL=gpt-4o-mini
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 OPENAI_TEMPERATURE=0
 
-AWS_ACCESS_KEY_ID=your_aws_access_key
-AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
-AWS_BUCKET_NAME=your_bucket_name
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_BUCKET_NAME=
 AWS_REGION=ap-south-1
 
 FRONTEND_URL=http://localhost:5173
@@ -352,11 +378,12 @@ MAX_UPLOAD_SIZE_MB=10
 
 CHROMA_PERSIST_DIR=vector_db
 CHROMA_COLLECTION_NAME=documind_documents
-
-DATABASE_URL=sqlite:///./documind.db
+MAX_SEARCH_DISTANCE=1.25
 ```
 
 Never commit the `.env` file or expose real credentials publicly.
+
+AWS configuration is optional during local development and will be required when S3 integration is implemented. PostgreSQL configuration will be added with the persistent-state milestone.
 
 ### 4. Start the FastAPI Server
 
@@ -372,14 +399,7 @@ Backend links:
 - Health check: http://127.0.0.1:8000/api/health
 - Swagger UI: http://127.0.0.1:8000/docs
 
-Expected health-check response:
-
-```json
-{
-  "status": "healthy",
-  "message": "DocuMind AI API is running"
-}
-```
+A successful health check returns HTTP `200` with a `healthy` status and an API availability message.
 
 ## Frontend Setup
 
@@ -417,11 +437,7 @@ The frontend will be available at:
 http://localhost:5173
 ```
 
-When both servers are running, the frontend should display:
-
-```text
-Backend status: DocuMind AI API is running
-```
+When both servers are running, the frontend displays the backend health status above the upload and search interfaces.
 
 ## Document Upload
 
@@ -502,25 +518,30 @@ Example response:
         "source": "Complete Notes.pdf",
         "chunk_index": 1,
         "document_id": "generated-deterministic-id"
-      }
+      },
+      "distance": 0.82
     }
   ]
 }
 ```
 
-The search endpoint currently returns relevant chunks. Answer generation using the retrieved context will be added in the RAG milestone.
+The search endpoint returns chunks whose raw vector distance is less than or equal to the configured `MAX_SEARCH_DISTANCE`. A smaller distance indicates a closer semantic match. If no result passes the threshold, the endpoint returns an empty `results` list.
+
+Answer generation using the retrieved context will be added in the RAG milestone.
 
 ## Duplicate-Safe Indexing
 
-DocuMind AI generates deterministic identifiers for document chunks using their source, chunk index, and content.
+Enterprise IT Support Assistant generates deterministic identifiers for document chunks using their source, chunk index, and content.
 
 This prevents the same chunk from being stored repeatedly when an identical document is uploaded more than once.
 
 ## Current Development Status
 
-The current application supports local document upload, persistent ChromaDB indexing, and semantic search through both the FastAPI API and React interface.
+The application currently supports local document upload, document parsing and chunking, OpenAI embedding generation, persistent ChromaDB indexing, and semantic search through both FastAPI and React.
 
-RAG answer generation, source citations, conversation history, authentication, ticket workflows, and production deployment have not yet been implemented.
+Search results include source, chunk, and raw vector-distance information. A configurable distance threshold removes low-relevance results, and automated unit tests verify the filtering behavior.
+
+Page-level citations, generated RAG answers, LangGraph workflows, PostgreSQL persistence, authentication, ticket operations, human approval, streaming, and production deployment have not yet been implemented.
 
 ## Development Roadmap
 
@@ -544,15 +565,27 @@ RAG answer generation, source citations, conversation history, authentication, t
 - [x] Add duplicate-safe chunk indexing
 - [x] Implement the semantic similarity search API
 - [x] Build the React semantic-search interface
+- [x] Return raw vector distances with search results
+- [x] Add configurable retrieval-distance filtering
+- [x] Handle searches with no relevant results
+- [x] Add automated unit tests for retrieval filtering
+- [ ] Preserve PDF page numbers during ingestion
 - [ ] Build the history-aware RAG pipeline
-- [ ] Return generated answers with source references
-- [ ] Add SQLite metadata and conversation history
+- [ ] Return generated answers with source and page citations
+- [ ] Add retrieval evaluation datasets and metrics
+- [ ] Build a LangGraph support workflow
+- [ ] Add PostgreSQL metadata, conversation history, and workflow state
 - [ ] Add conversation resume functionality
 - [ ] Add indexed-document management
+- [ ] Add authentication and authorization
+- [ ] Add ticket lookup and draft creation
+- [ ] Require human approval before ticket submission
+- [ ] Add streaming responses
 - [ ] Integrate AWS S3
-- [ ] Add automated tests and improved error handling
-- [ ] Containerize the application
-- [ ] Deploy the application
+- [ ] Expand API and integration tests
+- [ ] Improve error handling and structured logging
+- [ ] Containerize the application with Docker
+- [ ] Deploy the application to AWS
 
 ## Security
 
