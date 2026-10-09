@@ -486,7 +486,7 @@ Example request:
 ```json
 {
   "query": "What are the benefits of APIs?",
-  "limit": 3
+  "number_of_results": 3
 }
 ```
 
@@ -498,9 +498,11 @@ Example response:
   "results": [
     {
       "content": "APIs enable different systems and applications to communicate...",
-      "source": "Complete Notes.pdf",
-      "chunk_index": 1,
-      "document_id": "generated-deterministic-id"
+      "metadata": {
+        "source": "Complete Notes.pdf",
+        "chunk_index": 1,
+        "document_id": "generated-deterministic-id"
+      }
     }
   ]
 }
@@ -513,6 +515,12 @@ The search endpoint currently returns relevant chunks. Answer generation using t
 DocuMind AI generates deterministic identifiers for document chunks using their source, chunk index, and content.
 
 This prevents the same chunk from being stored repeatedly when an identical document is uploaded more than once.
+
+## Current Development Status
+
+The current application supports local document upload, persistent ChromaDB indexing, and semantic search through both the FastAPI API and React interface.
+
+RAG answer generation, source citations, conversation history, authentication, ticket workflows, and production deployment have not yet been implemented.
 
 ## Development Roadmap
 
@@ -535,7 +543,7 @@ This prevents the same chunk from being stored repeatedly when an identical docu
 - [x] Integrate persistent ChromaDB storage
 - [x] Add duplicate-safe chunk indexing
 - [x] Implement the semantic similarity search API
-- [ ] Build the React semantic-search interface
+- [x] Build the React semantic-search interface
 - [ ] Build the history-aware RAG pipeline
 - [ ] Return generated answers with source references
 - [ ] Add SQLite metadata and conversation history

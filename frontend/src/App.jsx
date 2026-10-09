@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import DocumentUpload from './components/DocumentUpload';
+import SemanticSearch from './components/SemanticSearch';
 
 function App() {
   const [backendStatus, setBackendStatus] = useState('Checking...')
@@ -37,6 +38,7 @@ useEffect(() => {
       </header>
 
       <DocumentUpload />
+      <SemanticSearch/>
     </main>
   );
 }
