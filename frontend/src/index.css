@@ -109,3 +109,13 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+.no-results {
+  margin: 20px 0 0;
+  padding: 16px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #64748b;
+  text-align: center;
+}

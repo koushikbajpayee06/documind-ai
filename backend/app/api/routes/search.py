@@ -26,7 +26,7 @@ async def semantic_search(
     request: SearchRequest,
 ) -> SearchResponse:
     try:
-        documents = search_documents(
+        document_score_pairs = search_documents(
             query=request.query,
             number_of_results=request.number_of_results,
         )
@@ -35,8 +35,9 @@ async def semantic_search(
             SearchResult(
                 content=document.page_content,
                 metadata=document.metadata,
+                distance=distance,
             )
-            for document in documents
+            for document,distance in document_score_pairs
         ]
 
         return SearchResponse(
