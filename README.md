@@ -26,7 +26,7 @@ The following features are currently working:
 - Empty-result handling for irrelevant queries
 - Automated unit tests for retrieval filtering
 
-The next milestone is citation-ready document ingestion. PDF pages will be processed separately so that each chunk preserves its source filename, page number, and chunk index. This metadata will later support grounded RAG answers with precise citations.
+The next milestone is grounded RAG answer generation. Retrieved chunks and their source, page, and chunk metadata will be provided to the OpenAI chat model so that generated answers can include precise citations.
 
 ## Features
 
@@ -49,10 +49,12 @@ The next milestone is citation-ready document ingestion. PDF pages will be proce
 - Test retrieval filtering and empty-query behavior with pytest
 - Expose REST APIs using FastAPI
 - Provide interactive API documentation through Swagger UI
+- Preserve PDF page numbers through chunking and indexing
+- Display page-aware search citations in React
+- Test PDF page extraction and metadata preservation with pytest
 
 ### Planned
 
-- Preserve PDF page numbers during ingestion
 - Generate grounded answers with source and page citations
 - Build a React question-answering interface
 - Orchestrate support workflows with LangGraph
@@ -543,6 +545,8 @@ Search results include source, chunk, and raw vector-distance information. A con
 
 Page-level citations, generated RAG answers, LangGraph workflows, PostgreSQL persistence, authentication, ticket operations, human approval, streaming, and production deployment have not yet been implemented.
 
+Generated RAG answers, LangGraph workflows, PostgreSQL persistence, authentication, ticket operations, human approval, streaming, and production deployment have not yet been implemented.
+
 ## Development Roadmap
 
 - [x] Initialize Git repository
@@ -569,7 +573,7 @@ Page-level citations, generated RAG answers, LangGraph workflows, PostgreSQL per
 - [x] Add configurable retrieval-distance filtering
 - [x] Handle searches with no relevant results
 - [x] Add automated unit tests for retrieval filtering
-- [ ] Preserve PDF page numbers during ingestion
+- [x] Preserve PDF page numbers during ingestion
 - [ ] Build the history-aware RAG pipeline
 - [ ] Return generated answers with source and page citations
 - [ ] Add retrieval evaluation datasets and metrics

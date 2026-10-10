@@ -23,9 +23,16 @@ def add_documents_to_vector_store(
 
     for index, document in enumerate(documents):
         source = document.metadata.get("source", "unknown")
+        page_number = document.metadata.get(
+            "page_number",
+            "not_applicable",
+        )
 
         id_input = (
-            f"{source}:{index}:{document.page_content}"
+            f"{source}:"
+            f"{page_number}:"
+            f"{index}:"
+            f"{document.page_content}"
         )
 
         document_id = sha256(
