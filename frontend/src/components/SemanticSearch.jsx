@@ -34,7 +34,7 @@ const SemanticSearch = () => {
             },
             body: JSON.stringify({
                 query: trimmedQuery,
-                number_of_results: 1,
+                number_of_results: 4,
             }),
             }
         );
@@ -82,10 +82,17 @@ const SemanticSearch = () => {
                 >
                     <p>{result.content}</p>
 
-                    <small>
-                    Source: {result.metadata.source} · Chunk:{" "}
-                    {result.metadata.chunk_index}
-                    </small>
+                <small>
+                    Source: {result.metadata.source}
+
+                    {result.metadata.page_number != null && (
+                        <>
+                        {" "}· Page: {result.metadata.page_number}
+                        </>
+                    )}
+
+                    {" "}· Chunk: {result.metadata.chunk_index}
+                </small>
                 </article>
                 ))}
         </div>

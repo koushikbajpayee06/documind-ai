@@ -1,13 +1,10 @@
 import logging
 from pathlib import Path
-
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
-
 from app.config import settings
 from app.schemas.document import DocumentUploadResponse
-from app.services.document_service import create_chunks, extract_text
+from app.services.document_service import create_chunks, load_documents
 from app.services.storage_service import save_uploaded_file
-
 from app.services.vector_store import add_documents_to_vector_store
 
 
@@ -35,18 +32,23 @@ async def upload_document(
             / saved_file["stored_filename"]
         )
 
-        extracted_text = extract_text(stored_path)
+        documents = load_documents(
+            file_path=stored_path,
+            source=saved_file["original_filename"],
+        )
 
         chunks = create_chunks(
-            text=extracted_text,
-            source=saved_file["original_filename"],
+            documents=documents,
         )
 
         document_ids = add_documents_to_vector_store(chunks)
 
         return DocumentUploadResponse(
             message="Document uploaded, processed, and indexed successfully",
-            character_count=len(extracted_text),
+            character_count=sum(
+                len(document.page_content)
+                for document in documents
+            ),
             chunk_count=len(document_ids),
             **saved_file,
         )
